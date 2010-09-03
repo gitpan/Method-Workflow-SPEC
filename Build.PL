@@ -12,10 +12,10 @@ my $build = Module::Build->new(
     requires => {
         'Carp'             => 0,
         'List::Util'       => 0,
-        'Method::Workflow' => 0,
+        'Method::Workflow' => '0.006',
         'Scalar::Util'     => 0,
-        'Method::Workflow' => '0.005',
         'Try::Tiny'        => 0,
+        'aliased'          => 0,
     },
     build_requires => {
         'Test::More' => 0.88,

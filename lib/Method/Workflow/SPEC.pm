@@ -5,14 +5,14 @@ use warnings;
 use Method::Workflow;
 use base 'Method::Workflow::Base';
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 use aliased 'Method::Workflow::SPEC::It';
 use aliased 'Method::Workflow::SPEC::BeforeEach';
 use aliased 'Method::Workflow::SPEC::AfterEach';
 use aliased 'Method::Workflow::SPEC::BeforeAll';
 use aliased 'Method::Workflow::SPEC::AfterAll';
-use aliased 'Method::Workflow::SPEC::Task';
+use aliased 'Method::Workflow::Task';
 export( $_, 'fennec' ) for qw/it before_all after_all before_each after_each/;
 
 use Method::Workflow::Meta qw/ meta_for /;
@@ -27,30 +27,6 @@ sub import_hook {
     my ( $class, $caller, $specs ) = @_;
     my $meta = meta_for( __PACKAGE__ );
     $meta->prop( $caller, $specs );
-}
-
-sub post_run_hook {
-    'SPEC' => sub {
-        my %params = @_;
-
-        my $out_ref = $params{out};
-
-        return unless "$params{owner}" eq "$params{root}";
-
-        my ( @out, @tasks );
-        for my $item ( @$out_ref ) {
-            my $list = ( blessed( $item ) && $item->isa( Task ))
-                ? \@tasks
-                : \@out;
-                push @$list => $item;
-        }
-
-        my $task = Task->new( subtasks_ref => \@tasks );
-        try { push @out => $task->run_task( $params{root} )                      }
-        catch { Method::Workflow::Base::handle_error( $task, $params{root}, $_, )};
-
-        @$out_ref = @out;
-    },
 }
 
 sub run {
@@ -80,8 +56,9 @@ sub run {
         push @tasks => Task->new(
             before_each_ref => \@before_each,
             after_each_ref  => \@after_each,
-            it              => $it,
-            describe        => $self,
+            task            => $it,
+            workflow        => $self,
+            owner           => $root,
         );
     }
 
@@ -92,7 +69,8 @@ sub run {
             after_all_ref   => \@after_all,
             subtasks_ref    => [@tasks],
             _ordering       => $order || undef,
-            describe        => $self,
+            workflow        => $self,
+            owner           => $root,
         ));
 
         for my $child ( @child_specs ) {
@@ -109,8 +87,11 @@ sub run {
         $self->parent_task->add_subtasks( @tasks );
         return @out;
     }
+    else {
+        meta_for( $self->root )->add_task( @tasks );
+    }
 
-    return ( @tasks, @out );
+    return @out;
 }
 
 1;

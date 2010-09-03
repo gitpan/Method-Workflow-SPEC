@@ -16,7 +16,7 @@ name: Method-Workflow-SPEC
 provides:
   Method::Workflow::SPEC:
     file: lib/Method/Workflow/SPEC.pm
-    version: 0.001
+    version: 0.002
   Method::Workflow::SPEC::AfterAll:
     file: lib/Method/Workflow/SPEC/AfterAll.pm
   Method::Workflow::SPEC::AfterEach:
@@ -29,17 +29,16 @@ provides:
     file: lib/Method/Workflow/SPEC/BeforeEach.pm
   Method::Workflow::SPEC::It:
     file: lib/Method/Workflow/SPEC/It.pm
-  Method::Workflow::SPEC::Task:
-    file: lib/Method/Workflow/SPEC/Task.pm
 requires:
   Carp: 0
   List::Util: 0
-  Method::Workflow: 0.005
+  Method::Workflow: 0.006
   Scalar::Util: 0
   Try::Tiny: 0
+  aliased: 0
 resources:
   bugtracker: http://github.com/exodist/Method-Workflow-SPEC/issues
   homepage: http://open-exodus.net/projects/Method-Workflow-SPEC
   license: http://dev.perl.org/licenses/
   repository: http://github.com/exodist/Method-Workflow-SPEC
-version: 0.001
+version: 0.002

@@ -1,0 +1,45 @@
+---
+abstract: 'RSPEC keywords + workflow'
+author:
+  - 'Chad Granum <exodist7@gmail.com>'
+build_requires:
+  Test::Exception: 0
+  Test::More: 0.88
+configure_requires:
+  Module::Build: 0.36
+generated_by: 'Module::Build version 0.3607'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Method-Workflow-SPEC
+provides:
+  Method::Workflow::SPEC:
+    file: lib/Method/Workflow/SPEC.pm
+    version: 0.001
+  Method::Workflow::SPEC::AfterAll:
+    file: lib/Method/Workflow/SPEC/AfterAll.pm
+  Method::Workflow::SPEC::AfterEach:
+    file: lib/Method/Workflow/SPEC/AfterEach.pm
+  Method::Workflow::SPEC::Base:
+    file: lib/Method/Workflow/SPEC/Base.pm
+  Method::Workflow::SPEC::BeforeAll:
+    file: lib/Method/Workflow/SPEC/BeforeAll.pm
+  Method::Workflow::SPEC::BeforeEach:
+    file: lib/Method/Workflow/SPEC/BeforeEach.pm
+  Method::Workflow::SPEC::It:
+    file: lib/Method/Workflow/SPEC/It.pm
+  Method::Workflow::SPEC::Task:
+    file: lib/Method/Workflow/SPEC/Task.pm
+requires:
+  Carp: 0
+  List::Util: 0
+  Method::Workflow: 0.005
+  Scalar::Util: 0
+  Try::Tiny: 0
+resources:
+  bugtracker: http://github.com/exodist/Method-Workflow-SPEC/issues
+  homepage: http://open-exodus.net/projects/Method-Workflow-SPEC
+  license: http://dev.perl.org/licenses/
+  repository: http://github.com/exodist/Method-Workflow-SPEC
+version: 0.001

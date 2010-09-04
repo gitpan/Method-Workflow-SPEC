@@ -16,7 +16,7 @@ name: Method-Workflow-SPEC
 provides:
   Method::Workflow::SPEC:
     file: lib/Method/Workflow/SPEC.pm
-    version: 0.002
+    version: 0.003
   Method::Workflow::SPEC::AfterAll:
     file: lib/Method/Workflow/SPEC/AfterAll.pm
   Method::Workflow::SPEC::AfterEach:
@@ -32,7 +32,7 @@ provides:
 requires:
   Carp: 0
   List::Util: 0
-  Method::Workflow: 0.006
+  Method::Workflow: 0.007
   Scalar::Util: 0
   Try::Tiny: 0
   aliased: 0
@@ -41,4 +41,4 @@ resources:
   homepage: http://open-exodus.net/projects/Method-Workflow-SPEC
   license: http://dev.perl.org/licenses/
   repository: http://github.com/exodist/Method-Workflow-SPEC
-version: 0.002
+version: 0.003

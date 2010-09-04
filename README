@@ -156,7 +156,7 @@ USE IN TESTING
 
         done_testing;
 
-  ORDERING TESTS
+  ORDERING TASKS
     You can specify an order at the class level and/or the block level. The
     ordering will carry-down to nested elements until a new order is
     specified.

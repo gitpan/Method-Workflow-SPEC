@@ -5,7 +5,7 @@ use warnings;
 use Method::Workflow;
 use base 'Method::Workflow::Base';
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 use aliased 'Method::Workflow::SPEC::It';
 use aliased 'Method::Workflow::SPEC::BeforeEach';
@@ -19,15 +19,9 @@ use Method::Workflow::Meta qw/ meta_for /;
 use Scalar::Util qw/ blessed /;
 use Try::Tiny;
 
-our @ORDER = qw/ ordered sorted random /;
+our @ORDER = Task->order_options;
 accessors @ORDER, 'parent_task';
 keyword 'describe';
-
-sub import_hook {
-    my ( $class, $caller, $specs ) = @_;
-    my $meta = meta_for( __PACKAGE__ );
-    $meta->prop( $caller, $specs );
-}
 
 sub run {
     my ( $self, $root ) = @_;
@@ -44,6 +38,13 @@ sub run {
 
     # Find any ordering
     my ( $order ) = grep { $self->$_ } @ORDER;
+
+    unless ( $order ) {
+        my $importer = blessed( $root ) || $root;
+        my $spec = meta_for( __PACKAGE__ )->prop( $importer );
+        ($order) = grep { $spec->{$_} } @ORDER
+            if $spec;
+    }
 
     # Add before/after each to nested describes.
     my @child_specs = $meta->items( __PACKAGE__ );
@@ -269,7 +270,7 @@ thrown from any block.
 
     done_testing;
 
-=head2 ORDERING TESTS
+=head2 ORDERING TASKS
 
 You can specify an order at the class level and/or the block level. The
 ordering will carry-down to nested elements until a new order is specified.

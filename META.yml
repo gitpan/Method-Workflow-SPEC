@@ -3,6 +3,7 @@ abstract: 'RSPEC keywords + workflow'
 author:
   - 'Chad Granum <exodist7@gmail.com>'
 build_requires:
+  Fennec::Lite: 0.004
   Test::Exception: 0
   Test::More: 0.88
 configure_requires:
@@ -16,29 +17,28 @@ name: Method-Workflow-SPEC
 provides:
   Method::Workflow::SPEC:
     file: lib/Method/Workflow/SPEC.pm
-    version: 0.003
+    version: 0.200
   Method::Workflow::SPEC::AfterAll:
     file: lib/Method/Workflow/SPEC/AfterAll.pm
   Method::Workflow::SPEC::AfterEach:
     file: lib/Method/Workflow/SPEC/AfterEach.pm
-  Method::Workflow::SPEC::Base:
-    file: lib/Method/Workflow/SPEC/Base.pm
   Method::Workflow::SPEC::BeforeAll:
     file: lib/Method/Workflow/SPEC/BeforeAll.pm
   Method::Workflow::SPEC::BeforeEach:
     file: lib/Method/Workflow/SPEC/BeforeEach.pm
   Method::Workflow::SPEC::It:
     file: lib/Method/Workflow/SPEC/It.pm
+  Method::Workflow::SPEC::Task:
+    file: lib/Method/Workflow/SPEC/Task.pm
 requires:
   Carp: 0
+  Exodist::Util: 0.003
   List::Util: 0
-  Method::Workflow: 0.007
-  Scalar::Util: 0
+  Method::Workflow: 0.200
   Try::Tiny: 0
-  aliased: 0
 resources:
   bugtracker: http://github.com/exodist/Method-Workflow-SPEC/issues
   homepage: http://open-exodus.net/projects/Method-Workflow-SPEC
   license: http://dev.perl.org/licenses/
   repository: http://github.com/exodist/Method-Workflow-SPEC
-version: 0.003
+version: 0.200

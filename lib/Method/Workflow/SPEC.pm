@@ -2,97 +2,107 @@ package Method::Workflow::SPEC;
 use strict;
 use warnings;
 
-use Method::Workflow;
-use base 'Method::Workflow::Base';
-
-our $VERSION = '0.003';
-
-use aliased 'Method::Workflow::SPEC::It';
-use aliased 'Method::Workflow::SPEC::BeforeEach';
-use aliased 'Method::Workflow::SPEC::AfterEach';
-use aliased 'Method::Workflow::SPEC::BeforeAll';
-use aliased 'Method::Workflow::SPEC::AfterAll';
-use aliased 'Method::Workflow::Task';
-export( $_, 'fennec' ) for qw/it before_all after_all before_each after_each/;
-
-use Method::Workflow::Meta qw/ meta_for /;
-use Scalar::Util qw/ blessed /;
+use Method::Workflow ();
+use Method::Workflow::SubClass;
+use Devel::Declare::Parser::Fennec;
 use Try::Tiny;
+use Exodist::Util qw/
+    alias
+    blessed
+    accessors
+    array_accessors
+/;
 
-our @ORDER = Task->order_options;
-accessors @ORDER, 'parent_task';
+our $VERSION = '0.200';
+
+alias qw/
+    Method::Workflow
+    Method::Workflow::SPEC::It
+    Method::Workflow::SPEC::BeforeEach
+    Method::Workflow::SPEC::AfterEach
+    Method::Workflow::SPEC::BeforeAll
+    Method::Workflow::SPEC::AfterAll
+    Method::Workflow::SPEC::Task
+/;
+
+sub _import {
+    my $class = shift;
+    my ( $caller, $specs ) = @_;
+    Workflow->_import( $caller, $specs );
+    $_->export_to( $caller, $specs ) for Workflow, It, BeforeEach, AfterEach, BeforeAll, AfterAll;
+}
+
 keyword 'describe';
 
-sub run {
-    my ( $self, $root ) = @_;
-    my @out = $self->method->( $root, $self );
-    my ( @tasks );
-    my $meta = meta_for( $self );
+accessors qw/parent_task/;
+array_accessors qw/before after result_tasks/;
 
-    # * Pull all before/after/it items from meta
-    my @before_each = $meta->pull_items( BeforeEach );
-    my @after_each  = $meta->pull_items( AfterEach  );
-    my @before_all  = $meta->pull_items( BeforeAll  );
-    my @after_all   = $meta->pull_items( AfterAll   );
-    my @it          = $meta->pull_items( It         );
+sub pre_child_run_hook {
+    my $self = shift;
+    my ( $invocant, $result ) = @_;
+    my @tasks;
 
-    # Find any ordering
-    my ( $order ) = grep { $self->$_ } @ORDER;
 
-    unless ( $order ) {
-        my $importer = blessed( $root ) || $root;
-        my $spec = meta_for( __PACKAGE__ )->prop( $importer );
-        ($order) = grep { $spec->{$_} } @ORDER
-            if $spec;
-    }
+    # Pull all before/after/it items from meta
+    my @before_each =         $self->pull_children( BeforeEach  );
+    my @before_all  =         $self->pull_children( BeforeAll   );
+    my @it          =         $self->pull_children( It          );
+    my @describe    =         $self->children(      __PACKAGE__ );
+    #
+    my @after_each_ordered = $self->pull_children( AfterEach   );
+    my @after_each = reverse @after_each_ordered;
+    my @after_all  = reverse $self->pull_children( AfterAll    );
 
-    # Add before/after each to nested describes.
-    my @child_specs = $meta->items( __PACKAGE__ );
-    for my $child ( @child_specs ) {
-        meta_for( $child )->add_item( $_ ) for @before_each, @after_each;
-    }
-
-    # Create tasks for 'it' elements
     for my $it ( @it ) {
         push @tasks => Task->new(
-            before_each_ref => \@before_each,
-            after_each_ref  => \@after_each,
-            task            => $it,
-            workflow        => $self,
-            owner           => $root,
+            it     => $it,
+            before_ref => \@before_each,
+            after_ref => \@after_each,
+            $self->ordering
+                ? ( $self->ordering => 1 )
+                : (),
+            $self->parent_ordering
+                ? ( parent_ordering => $self->parent_ordering )
+                : (),
         );
     }
 
-    # If there are wrapping items or config create a wrapping task.
-    if ( @before_all || @after_all || $order ) {
-        @tasks = ( Task->new(
-            before_all_ref  => \@before_all,
-            after_all_ref   => \@after_all,
-            subtasks_ref    => [@tasks],
-            _ordering       => $order || undef,
-            workflow        => $self,
-            owner           => $root,
-        ));
-
-        for my $child ( @child_specs ) {
-            $child->parent_task( $tasks[0] ) for @child_specs;
-        }
+    # Create a root task if there are before/after alls
+    # - Root should also have ordering if necessary
+    if ( @tasks && ( @before_all || @after_all )) {
+        my $parent = Task->new(
+            subtasks_ref => \@tasks,
+            before_ref => \@before_all,
+            after_ref => \@after_all,
+            $self->ordering
+                ? ( $self->ordering => 1 )
+                : (),
+            $self->parent_ordering
+                ? ( parent_ordering => $self->parent_ordering )
+                : (),
+        );
+        $self->parent_task( $parent );
+        $self->result_tasks_ref( $result->tasks_ref );
+        $result->tasks_ref( \@tasks );
+    }
+    elsif ( @tasks ) {
+        $result->push_tasks( @tasks );
     }
 
-    for my $child ( @child_specs ) {
-        $child->set_order_unless_set( $order )
-            if $order && !grep { $child->$_ } @ORDER;
+    for my $child ( @describe ) {
+        $child->push_children( @before_each, @after_each_ordered );
     }
+}
 
-    if ( $self->parent_task ) {
-        $self->parent_task->add_subtasks( @tasks );
-        return @out;
-    }
-    else {
-        meta_for( $self->root )->add_task( @tasks );
-    }
+sub post_child_run_hook {
+    my $self = shift;
+    my ( $invocant, $result ) = @_;
+    my $parent = $self->parent_task;
+    return unless $parent;
 
-    return @out;
+    $result->tasks_ref( $self->result_tasks_ref );
+    $self->result_tasks_ref([]);
+    $result->push_tasks( $parent );
 }
 
 1;
@@ -124,38 +134,35 @@ From the acceptance test:
     #################
     # Define the workflow
 
-    start_class_workflow;
     our @RUN_ORDER;
 
-    describe aa {
+    describe a {
         push @RUN_ORDER => "Describe";
 
-        before_all cc { push @RUN_ORDER => "Before All" }
-        before_each bb { push @RUN_ORDER => "Before Each" }
+        before_all b { push @RUN_ORDER => "Before All" }
+        before_each c { push @RUN_ORDER => "Before Each" }
 
-        it dd {
+        it d {
             push @RUN_ORDER => "It";
         }
 
-        after_each ff { push @RUN_ORDER => "After Each" }
-        after_all ee { push @RUN_ORDER => "After All" }
+        after_each e { push @RUN_ORDER => "After Each" }
+        after_all f { push @RUN_ORDER => "After All" }
 
         describe aa {
             push @RUN_ORDER => "Describe Nested";
 
-            before_all cc { push @RUN_ORDER => "Before All Nested" }
-            before_each bb { push @RUN_ORDER => "Before Each Nested" }
+            before_all bb { push @RUN_ORDER => "Before All Nested" }
+            before_each cc { push @RUN_ORDER => "Before Each Nested" }
 
             it dd {
                 push @RUN_ORDER => "It Nested";
             }
 
-            after_each ff { push @RUN_ORDER => "After Each Nested" }
-            after_all ee { push @RUN_ORDER => "After All Nested" }
+            after_each ee { push @RUN_ORDER => "After Each Nested" }
+            after_all ff { push @RUN_ORDER => "After All Nested" }
         }
     }
-
-    end_class_workflow;
 
     ##################
     # Run the workflow

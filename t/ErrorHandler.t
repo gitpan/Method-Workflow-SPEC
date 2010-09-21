@@ -1,15 +1,15 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
+
 use Test::More;
 use Method::Workflow::SPEC ':ordered';
-
-start_class_workflow;
+use Data::Dumper;
 
 my @errors;
 my @ran;
 my @aorder;
-error_handler( sub { @errors = @_ });
+root_workflow->error_handler( sub { push @errors => @_ });
 
 describe x {
     it xxx {
@@ -39,10 +39,8 @@ describe a (random => 1) {
 describe b { it b { push @ran => 'b' }}
 describe c { it c { push @ran => 'c' }}
 
-end_class_workflow;
-run_workflow;
-
-my ( $item, $root, $error ) = @errors;
+my $result = run_workflow;
+my ( $wf, $error ) = @{ $errors[0]};
 like( $error, qr/Error! at/, "Workflow element error caught" );
 is( @aorder, 3, "All 3 'a' blocks ran" );
 is_deeply(

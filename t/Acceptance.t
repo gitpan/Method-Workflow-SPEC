@@ -8,8 +8,6 @@ use Method::Workflow::SPEC;
 
 can_ok( __PACKAGE__, qw/describe it before_each after_each before_all after_all/ );
 
-start_class_workflow;
-
 our @RUN_ORDER;
 
 throws_ok(
@@ -21,35 +19,33 @@ throws_ok(
     "Cannot create spec element '$_' outside describe",
 ) for qw/before_all before_each it after_each after_all/;
 
-describe aa {
+describe a {
     push @RUN_ORDER => "Describe";
 
-    before_all cc { push @RUN_ORDER => "Before All" }
-    before_each bb { push @RUN_ORDER => "Before Each" }
+    before_all b { push @RUN_ORDER => "Before All" }
+    before_each c { push @RUN_ORDER => "Before Each" }
 
-    it dd {
+    it d {
         push @RUN_ORDER => "It";
     }
 
-    after_each ff { push @RUN_ORDER => "After Each" }
-    after_all ee { push @RUN_ORDER => "After All" }
+    after_each e { push @RUN_ORDER => "After Each" }
+    after_all f { push @RUN_ORDER => "After All" }
 
     describe aa {
         push @RUN_ORDER => "Describe Nested";
 
-        before_all cc { push @RUN_ORDER => "Before All Nested" }
-        before_each bb { push @RUN_ORDER => "Before Each Nested" }
+        before_all bb { push @RUN_ORDER => "Before All Nested" }
+        before_each cc { push @RUN_ORDER => "Before Each Nested" }
 
         it dd {
             push @RUN_ORDER => "It Nested";
         }
 
-        after_each ff { push @RUN_ORDER => "After Each Nested" }
-        after_all ee { push @RUN_ORDER => "After All Nested" }
+        after_each ee { push @RUN_ORDER => "After Each Nested" }
+        after_all ff { push @RUN_ORDER => "After All Nested" }
     }
 }
-
-end_class_workflow;
 
 run_workflow;
 

@@ -12,13 +12,13 @@ my $build = Module::Build->new(
     requires => {
         'Carp'             => 0,
         'List::Util'       => 0,
-        'Method::Workflow' => '0.007',
-        'Scalar::Util'     => 0,
+        'Method::Workflow' => '0.200',
         'Try::Tiny'        => 0,
-        'aliased'          => 0,
+        'Exodist::Util'    => '0.003',
     },
     build_requires => {
-        'Test::More' => 0.88,
+        'Fennec::Lite'    => '0.004',
+        'Test::More'      => '0.88',
         'Test::Exception' => 0,
     },
     meta_merge => {

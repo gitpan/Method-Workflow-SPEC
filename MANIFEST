@@ -2,10 +2,10 @@ Build.PL
 lib/Method/Workflow/SPEC.pm
 lib/Method/Workflow/SPEC/AfterAll.pm
 lib/Method/Workflow/SPEC/AfterEach.pm
-lib/Method/Workflow/SPEC/Base.pm
 lib/Method/Workflow/SPEC/BeforeAll.pm
 lib/Method/Workflow/SPEC/BeforeEach.pm
 lib/Method/Workflow/SPEC/It.pm
+lib/Method/Workflow/SPEC/Task.pm
 MANIFEST			This list of files
 META.yml
 README

@@ -2,10 +2,15 @@ package Method::Workflow::SPEC::BeforeEach;
 use strict;
 use warnings;
 
-use Method::Workflow;
-use base 'Method::Workflow::SPEC::Base';
+use Method::Workflow::SubClass;
+use Carp qw/croak/;
 
 keyword 'before_each';
+
+sub init {
+    croak shift->keyword . " can only be used within a describe {} block."
+        unless parent_workflow()->isa( 'Method::Workflow::SPEC' );
+}
 
 1;
 

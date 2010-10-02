@@ -13,7 +13,7 @@ use Exodist::Util qw/
     array_accessors
 /;
 
-our $VERSION = '0.200';
+our $VERSION = '0.201';
 
 alias qw/
     Method::Workflow
@@ -25,11 +25,11 @@ alias qw/
     Method::Workflow::SPEC::Task
 /;
 
-sub _import {
+sub after_import {
     my $class = shift;
     my ( $caller, $specs ) = @_;
-    Workflow->_import( $caller, $specs );
-    $_->export_to( $caller, $specs ) for Workflow, It, BeforeEach, AfterEach, BeforeAll, AfterAll;
+    Workflow->after_import( $caller, $specs );
+    $_->export_to( $caller ) for Workflow, It, BeforeEach, AfterEach, BeforeAll, AfterAll;
 }
 
 keyword 'describe';

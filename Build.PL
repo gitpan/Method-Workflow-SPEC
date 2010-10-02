@@ -12,9 +12,9 @@ my $build = Module::Build->new(
     requires => {
         'Carp'             => 0,
         'List::Util'       => 0,
-        'Method::Workflow' => '0.200',
+        'Method::Workflow' => '0.202',
         'Try::Tiny'        => 0,
-        'Exodist::Util'    => '0.003',
+        'Exodist::Util'    => '0.005',
     },
     build_requires => {
         'Fennec::Lite'    => '0.004',
